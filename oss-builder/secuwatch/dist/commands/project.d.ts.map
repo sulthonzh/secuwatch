@@ -1,0 +1,1 @@
+{"version":3,"file":"project.d.ts","sourceRoot":"","sources":["../../src/commands/project.ts"],"names":[],"mappings":"AAGA,qBAAa,cAAc;IACnB,OAAO,CAAC,OAAO,GAAE,GAAQ;YA0BjB,UAAU;YAoCV,aAAa;YAgCb,YAAY;YAiBZ,kBAAkB;IAyBhC,OAAO,CAAC,oBAAoB;IAoC5B,OAAO,CAAC,SAAS;YAaH,UAAU;YASV,cAAc;YAUd,MAAM;CAIrB"}
