@@ -14,8 +14,7 @@ describe('ProjectScanner', () => {
   let config: ConfigManager;
 
   beforeEach(() => {
-    config = new ConfigManager();
-    scanner = new ProjectScanner(config);
+    scanner = new ProjectScanner();
     jest.clearAllMocks();
   });
 
@@ -135,7 +134,7 @@ describe('ProjectScanner', () => {
       mockedFs.existsSync.mockReturnValue(true);
       mockedFs.readJson.mockResolvedValue(mockPackageJson);
 
-      const result = await scanner.loadPackageInfo('/test-project');
+      const result = (scanner as any).loadPackageInfo('/test-project');
 
       expect(result.name).toBe('test-project');
       expect(result.version).toBe('1.0.0');

@@ -5,6 +5,12 @@ jest.mock('fs-extra');
 
 const mockedFs = fs as jest.Mocked<typeof fs>;
 
+// Mock ensureDir to accept no arguments and return Promise<void>
+mockedFs.ensureDir.mockImplementation(() => Promise.resolve());
+
+// Mock pathExists to return the mocked value
+mockedFs.pathExists.mockImplementation((path: string) => Promise.resolve(false));
+
 describe('ConfigManager', () => {
   let configManager: ConfigManager;
   let mockConfigPath: string;
@@ -22,8 +28,8 @@ describe('ConfigManager', () => {
 
   describe('load and save', () => {
     it('should load default config when no config exists', async () => {
-      mockedFs.pathExists.mockResolvedValue(false);
-      mockedFs.ensureDir.mockResolvedValue();
+      // Reset mock to default implementation
+      mockedFs.pathExists.mockImplementation((path: string) => Promise.resolve(false));
       mockedFs.writeJson.mockResolvedValue();
 
       const config = await configManager.load();
@@ -46,20 +52,25 @@ describe('ConfigManager', () => {
         ]
       };
 
-      mockedFs.pathExists.mockResolvedValue(true);
+      // Mock specific behavior for this test
+      const originalPathExists = mockedFs.pathExists;
+      mockedFs.pathExists.mockImplementation((path: string) => Promise.resolve(true));
       mockedFs.readJson.mockResolvedValue(existingConfig);
 
       const config = await configManager.load();
 
       expect(config).toEqual(existingConfig);
+      
+      // Reset mock
+      mockedFs.pathExists.mockImplementation(originalPathExists);
     });
 
     it('should handle corrupt config file gracefully', async () => {
-      mockedFs.pathExists.mockResolvedValue(true);
+      // Mock specific behavior for this test
+      mockedFs.pathExists.mockImplementation((path: string) => Promise.resolve(true));
       mockedFs.readJson.mockImplementation(() => {
         throw new Error('Invalid JSON');
       });
-      mockedFs.ensureDir.mockResolvedValue();
       mockedFs.writeJson.mockResolvedValue();
 
       const config = await configManager.load();
