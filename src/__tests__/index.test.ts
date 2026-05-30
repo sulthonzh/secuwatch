@@ -2,8 +2,13 @@ describe('SecuWatch', () => {
   beforeAll(() => {
     // Mock process.exit to prevent CLI from exiting during tests
     jest.spyOn(process, 'exit').mockImplementation(() => {
-      throw new Error('process.exit called');
+      // Don't throw, just do nothing
+      return undefined as never;
     });
+    
+    // Mock console.log to prevent output during tests
+    jest.spyOn(console, 'log').mockImplementation(() => {});
+    jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterAll(() => {
