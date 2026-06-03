@@ -141,7 +141,8 @@ export class ProjectScanner {
         const severity = this.mapSeverity(advisory.severity);
         
         // Filter by severity threshold
-        if (this.getSeverityLevel(severity) < this.getSeverityLevel(options.severity || 'medium')) {
+        const severityThreshold = options.severity || 'medium';
+        if (this.getSeverityLevel(severity) < this.getSeverityLevel(severityThreshold)) {
           return;
         }
 
@@ -195,7 +196,7 @@ export class ProjectScanner {
           name,
           current: data.current || '0.0.0',
           latest: data.latest || '0.0.0',
-          type: this.getDependencyType(name, data.current),
+          type: this.getDependencyType(),
           wanted: data.wanted,
           latestFrom: data.latestFrom
         });
@@ -236,18 +237,18 @@ export class ProjectScanner {
     try {
       const packageInfo = await this.loadPackageInfo(projectPath);
       
-      for (const [name, version] of Object.entries(packageInfo.dependencies || {})) {
+      Object.entries(packageInfo.dependencies || {}).forEach(() => {
         try {
           // This would check npm registry for deprecated packages
           // For now, placeholder implementation
-          // const info = await fetch(`https://registry.npmjs.org/${name}`);
+          // const info = await fetch(`https://registry.npmjs.org/${package}`);
           // if (info.deprecated) {
-          //   warnings.push(`Package ${name} is deprecated: ${info.deprecated}`);
+          //   warnings.push(`Package is deprecated`);
           // }
         } catch {
           // Ignore registry check failures
         }
-      }
+      });
     } catch {
       // Ignore package load failures
     }
@@ -294,7 +295,7 @@ export class ProjectScanner {
     return levels[severity as keyof typeof levels] || 1;
   }
 
-  private getDependencyType(name: string, current: string): 'dependencies' | 'devDependencies' | 'peerDependencies' | 'optionalDependencies' {
+  private getDependencyType(): 'dependencies' | 'devDependencies' | 'peerDependencies' | 'optionalDependencies' {
     // This is a simplified implementation - in a real implementation,
     // we would need to check the package.json to determine the dependency type
     return 'dependencies';

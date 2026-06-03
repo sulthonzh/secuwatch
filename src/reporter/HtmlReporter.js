@@ -1,8 +1,10 @@
-export class HtmlReporter {
-  static async generateHtml(report: any): Promise<string> {
-    const timestamp = new Date(report.generatedAt).toLocaleString();
-    
-    return `<!DOCTYPE html>
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.HtmlReporter = void 0;
+class HtmlReporter {
+    static async generateHtml(report) {
+        const timestamp = new Date(report.generatedAt).toLocaleString();
+        return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -255,7 +257,7 @@ export class HtmlReporter {
         <div class="projects">
             <h2>Project Details</h2>
             
-            ${report.projects ? report.projects.map((project: any) => this.generateProjectHtml(project)).join('') : ''}
+            ${report.projects ? report.projects.map((project) => this.generateProjectHtml(project)).join('') : ''}
             
             ${!report.projects || report.projects.length === 0 ? '<p class="warning">No projects configured for monitoring</p>' : ''}
         </div>
@@ -295,29 +297,26 @@ export class HtmlReporter {
     </script>
 </body>
 </html>`;
-  }
-
-  private static generateProjectHtml(project: any): string {
-    const vulnerabilities = project.vulnerabilities || [];
-    const outdated = project.outdated || [];
-    const warnings = project.warnings || [];
-    
-    // Determine project status
-    let statusClass = 'status-clean';
-    let statusText = 'Clean';
-    let statusEmoji = '✅';
-    
-    if (vulnerabilities.length > 0) {
-      statusClass = 'status-danger';
-      statusText = 'Vulnerable';
-      statusEmoji = '🚨';
-    } else if (outdated.length > 0) {
-      statusClass = 'status-warning';
-      statusText = 'Outdated';
-      statusEmoji = '⚠️';
     }
-    
-    let html = `
+    static generateProjectHtml(project) {
+        const vulnerabilities = project.vulnerabilities || [];
+        const outdated = project.outdated || [];
+        const warnings = project.warnings || [];
+        // Determine project status
+        let statusClass = 'status-clean';
+        let statusText = 'Clean';
+        let statusEmoji = '✅';
+        if (vulnerabilities.length > 0) {
+            statusClass = 'status-danger';
+            statusText = 'Vulnerable';
+            statusEmoji = '🚨';
+        }
+        else if (outdated.length > 0) {
+            statusClass = 'status-warning';
+            statusText = 'Outdated';
+            statusEmoji = '⚠️';
+        }
+        let html = `
         <div class="project">
             <div class="project-header">
                 <h3>${statusEmoji} ${project.name}</h3>
@@ -343,59 +342,53 @@ export class HtmlReporter {
                     </div>
                 </div>
     `;
-    
-    // Add warnings if any
-    if (warnings.length > 0) {
-      html += `
+        // Add warnings if any
+        if (warnings.length > 0) {
+            html += `
         <div class="warning">
             <strong>Warnings:</strong>
             <ul>
-                ${warnings.map((warning: string) => `<li>${warning}</li>`).join('')}
+                ${warnings.map((warning) => `<li>${warning}</li>`).join('')}
             </ul>
         </div>
       `;
-    }
-    
-    // Add vulnerabilities section
-    if (vulnerabilities.length > 0) {
-      html += `
+        }
+        // Add vulnerabilities section
+        if (vulnerabilities.length > 0) {
+            html += `
         <div class="vulnerabilities">
             <div class="section-title">
                 <span class="emoji">🔍</span>
                 Vulnerabilities (${vulnerabilities.length})
             </div>
             <div class="vulnerability-list">
-                ${vulnerabilities.map((vuln: any) => this.generateVulnerabilityHtml(vuln)).join('')}
+                ${vulnerabilities.map((vuln) => this.generateVulnerabilityHtml(vuln)).join('')}
             </div>
         </div>
       `;
-    }
-    
-    // Add outdated packages section
-    if (outdated.length > 0) {
-      html += `
+        }
+        // Add outdated packages section
+        if (outdated.length > 0) {
+            html += `
         <div class="outdated">
             <div class="section-title">
                 <span class="emoji">📦</span>
                 Outdated Packages (${outdated.length})
             </div>
             <div class="outdated-list">
-                ${outdated.map((pkg: any) => this.generateOutdatedHtml(pkg)).join('')}
+                ${outdated.map((pkg) => this.generateOutdatedHtml(pkg)).join('')}
             </div>
         </div>
       `;
-    }
-    
-    html += `
+        }
+        html += `
             </div>
         </div>
     `;
-    
-    return html;
-  }
-
-  private static generateVulnerabilityHtml(vuln: any): string {
-    return `
+        return html;
+    }
+    static generateVulnerabilityHtml(vuln) {
+        return `
         <div class="vulnerability-item ${vuln.severity}">
             <div class="vulnerability-title">
                 ${vuln.title}
@@ -407,10 +400,9 @@ export class HtmlReporter {
             ${vuln.advisory ? `<div><strong>Advisory:</strong> <a href="${vuln.advisory}" target="_blank">${vuln.advisory}</a></div>` : ''}
         </div>
     `;
-  }
-
-  private static generateOutdatedHtml(pkg: any): string {
-    return `
+    }
+    static generateOutdatedHtml(pkg) {
+        return `
         <div class="outdated-item">
             <div class="vulnerability-title">${pkg.name}</div>
             <div><strong>Current:</strong> ${pkg.current}</div>
@@ -419,16 +411,12 @@ export class HtmlReporter {
             ${pkg.latestFrom ? `<div><strong>Latest from:</strong> ${pkg.latestFrom}</div>` : ''}
         </div>
     `;
-  }
-
-  private static escapeHtml(text: string): string {
-    // Simple HTML escape - this is a static method that returns a string
-    // In a real implementation, you'd use a proper HTML escaping library
-    return text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-  }
+    }
+    static escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
 }
+exports.HtmlReporter = HtmlReporter;
+//# sourceMappingURL=HtmlReporter.js.map

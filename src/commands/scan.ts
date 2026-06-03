@@ -1,11 +1,10 @@
-import { ConfigManager } from '../config/ConfigManager';
 import { ProjectScanner, ScanResult } from '../scanner/ProjectScanner';
 import { SecurityReporter } from '../reporter/SecurityReporter';
 
 export class ScanCommand {
   async execute(path: string = process.cwd(), options: any = {}) {
     try {
-      const config = new ConfigManager();
+      // const config = new ConfigManager(); // TODO: Use config for thresholds
       const scanner = new ProjectScanner();
       
       const result = await scanner.scan(path, {

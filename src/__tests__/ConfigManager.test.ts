@@ -1,6 +1,5 @@
 import { ConfigManager } from '../config/ConfigManager';
 import fs from 'fs-extra';
-import path from 'path';
 import os from 'os';
 
 // Mock fs-extra and os
@@ -19,7 +18,7 @@ describe('ConfigManager', () => {
     
     // Setup default mock behaviors
     (fs.ensureDir as jest.MockedFunction<any>).mockResolvedValue();
-    (fs.pathExists as jest.MockedFunction<any>).mockResolvedValue(false); // Default: no config file exists
+    (fs.pathExists as jest.MockedFunction<any>).mockResolvedValue(false);
     (fs.readJson as jest.MockedFunction<any>).mockResolvedValue({
       projectsDir: '/home/user/projects',
       severity: 'medium',
@@ -111,26 +110,17 @@ describe('ConfigManager', () => {
     });
 
     it('should set configuration values', async () => {
-      // Mock the read to return updated config after save
-      (fs.readJson as jest.MockedFunction<any>).mockImplementation((filePath: any) => {
-        if (filePath && filePath.toString().includes('config.json')) {
-          return Promise.resolve({
-            projectsDir: '/test/projects',
-            severity: 'high',
-            checkInterval: 7200,
-            emailNotifications: false,
-            notifications: {},
-            projects: []
-          });
-        }
-        return Promise.resolve({});
-      });
-
       await configManager.set({ severity: 'high', checkInterval: 7200 });
 
-      const config = await configManager.getAll();
-      expect(config.severity).toBe('high');
-      expect(config.checkInterval).toBe(7200);
+      // Verify that write was called with the updated config
+      expect(fs.writeJson).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          severity: 'high',
+          checkInterval: 7200
+        }),
+        { spaces: 2 }
+      );
     });
   });
 
@@ -149,9 +139,64 @@ describe('ConfigManager', () => {
       await configManager.load();
     });
 
+    it('should add a project', async () => {
+      // Mock the file system to persist the change
+      const mockConfig = {
+        ...await configManager.getAll(),
+        projects: []
+      };
 
+      (fs.readJson as jest.MockedFunction<any>).mockImplementation(() => {
+        return Promise.resolve(mockConfig);
+      });
 
+      (fs.writeJson as jest.MockedFunction<any>).mockImplementation((path: string, data: any) => {
+        // Update the in-memory mock
+        mockConfig.projects = data.projects;
+        return Promise.resolve();
+      });
 
+      await configManager.addProject('my-app', '/path/to/my-app');
+
+      // Verify the save was called
+      expect(fs.writeJson).toHaveBeenCalled();
+    });
+
+    it('should not add duplicate project', async () => {
+      // Mock to return config with existing project
+      (fs.readJson as jest.MockedFunction<any>).mockResolvedValue({
+        projectsDir: '/test/projects',
+        severity: 'medium',
+        checkInterval: 3600,
+        emailNotifications: false,
+        notifications: {},
+        projects: [
+          { name: 'my-app', path: '/path/to/my-app', added: '2023-01-01T00:00:00.000Z' }
+        ]
+      });
+
+      await expect(configManager.addProject('my-app', '/another/path'))
+        .rejects.toThrow("Project 'my-app' already exists");
+    });
+
+    it('should remove a project', async () => {
+      // Mock initial config with project
+      (fs.readJson as jest.MockedFunction<any>).mockResolvedValue({
+        projectsDir: '/test/projects',
+        severity: 'medium',
+        checkInterval: 3600,
+        emailNotifications: false,
+        notifications: {},
+        projects: [
+          { name: 'my-app', path: '/path/to/my-app', added: '2023-01-01T00:00:00.000Z' }
+        ]
+      });
+
+      await configManager.removeProject('my-app');
+
+      // Verify the save was called
+      expect(fs.writeJson).toHaveBeenCalled();
+    });
 
     it('should get a specific project', async () => {
       const configWithProject = {
@@ -171,7 +216,7 @@ describe('ConfigManager', () => {
       expect(project).toEqual({
         name: 'my-app',
         path: '/path/to/my-app',
-        added: expect.any(String)
+        added: '2023-01-01T00:00:00.000Z'
       });
 
       const nonExistentProject = await configManager.getProject('non-existent');

@@ -1,6 +1,5 @@
 import { ConfigManager } from '../config/ConfigManager';
 import { ProjectMonitor, MonitorResult } from '../monitor/ProjectMonitor';
-import { SecurityReporter } from '../reporter/SecurityReporter';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 
@@ -53,7 +52,7 @@ export class MonitorCommand {
   }
 
   private displayResults(result: MonitorResult): void {
-    const reporter = new SecurityReporter();
+    // const reporter = new SecurityReporter(); // TODO: Implement reporter usage
     
     console.log(`Security Monitor Report - ${new Date().toLocaleString()}`);
     console.log(`====================================`);
